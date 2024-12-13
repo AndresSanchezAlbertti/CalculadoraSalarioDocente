@@ -1,3 +1,4 @@
+
 const cargosDB = [
     { area: "primaria", nombre_cargo: "maestro_grado(j.s)", puntaje_cargo: 1135 },
     { area: "primaria", nombre_cargo: "vicedirector(j.s)", puntaje_cargo: 15 },
@@ -10,8 +11,9 @@ const cargosDB = [
 ];
 
 const INDICE_I = 157.5300;
-const sumaFijaTestigo = 163222;
-const puntajeCargoTestigo = 1135;  
+const sumaFijaTestigoJornadaSimple = 224445;
+const puntajeCargoTestigoJornadaSimple = 1135;  
+const sumaFijaMaterialDidactico = 264204;
 
 function calcularSueldo() {
     const area = document.getElementById("area").value;
@@ -45,40 +47,38 @@ function calcularSueldo() {
 //calculo el total del sueldo
 
     const puntajeCargo = cargoData.puntaje_cargo;
-
+    //OBTENGO PORCENTAJE DE ANTIGUEDAD
     const antiguedadPorcentaje = obtenerPorcentajeAntiguedad(antiguedad);
-    const sueldoBasico = puntajeCargo * INDICE_I;
-    const antiguedadMonto = (sueldoBasico * antiguedadPorcentaje) / 100;
+    //CALCULO SUELDO BASICO
+    const sueldoBasico = new SueldoBasico(puntajeCargo, INDICE_I).calcularSueldoBasico();
+    //CAÑCULO ANTIGUEDAD
+    const antiguedadMonto = new Antiguedad(antiguedadPorcentaje, sueldoBasico).calcularAntiguedad();
+    //CALCULO SUMA FIJA DECRETO
 
-    const sumaFijaDecreto = obtener_proporcionalidad(puntajeCargo, sumaFijaTestigo, puntajeCargoTestigo);
-    const antiguedadDecreto = (sumaFijaDecreto * antiguedadPorcentaje)/100;
-    const adicionalSalarial = (sueldoBasico + sumaFijaDecreto) * 0.1;
-    const materialDidactico = sumaFijaDecreto * 0.4;
-    const materialDidacticoNRNB = sumaFijaDecreto * 0.6;
+    const sumaFijaDecreto = new Decreto483(antiguedadPorcentaje, puntajeCargo, sumaFijaTestigoJornadaSimple).calcularProporcionalidad(sumaFijaTestigoJornadaSimple, puntajeCargoTestigoJornadaSimple);
+    //CALCULO ANTIGUEDAD DECRETO
+    const antiguedadDecreto = new Decreto483(antiguedadPorcentaje, puntajeCargo, sumaFijaDecreto).calcularAntiguedadDecreto();
+    
+    const adicionalSalarial = (sueldoBasico + sumaFijaDecreto) *0.1;
+    const materialDidactico= obtener_proporcionalidad(puntajeCargo, sumaFijaMaterialDidactico, puntajeCargoTestigoJornadaSimple);
     const complementoMinimoGarantizado = calcular_complemento_minimo_garantizado(sueldoBasico, antiguedadMonto, adicionalSalarial, sumaFijaDecreto, antiguedadDecreto, materialDidactico, obtenerSueldoMinimoGarantizado(jornada));
     const cfp = jornadaEquivalente(jornada) * 0.5;
     const sumaFija = puntajeCargo * 0.8;
     const compensacionTransitoria = jornadaEquivalente(jornada) * 0.7;
-
-    const totalSueldo =
-        sueldoBasico +
-        antiguedadMonto +
-        sumaFijaDecreto +
-        antiguedadDecreto +
-        adicionalSalarial +
-        materialDidactico +
-        materialDidacticoNRNB +
-        complementoMinimoGarantizado +
-        cfp +
-        sumaFija +
-        compensacionTransitoria;
+    const salarioNeto = calcularSalarioNeto(antiguedadPorcentaje,sueldoBasico, antiguedadMonto, sumaFijaDecreto, antiguedadDecreto, adicionalSalarial, materialDidactico);
 
     document.querySelector(".textoresultado").innerHTML = `
         <p><strong>Sueldo Básico:</strong> ${sueldoBasico.toFixed(2)}</p>
         <p><strong>Antigüedad:</strong> ${antiguedadMonto.toFixed(2)}</p>
+        <p><strong>Suma Fija:</strong> ${sumaFija.toFixed(2)}</p>
+        
+        <p><strong>Antigüedad Decreto:</strong> ${antiguedadDecreto.toFixed(2)}</p>
+
+        <p><strong>Adicional Salarial:</strong> ${adicionalSalarial.toFixed(2)}</p>
+        <p><strong>Material Didáctico:</strong> ${materialDidactico.toFixed(2)}</p>
 
         <p><strong>Suma Fija Decreto 483:</strong> ${sumaFijaDecreto.toFixed(2)}</p>
-        <p><strong>Total Sueldo:</strong> ${totalSueldo.toFixed(2)}</p>
+        <p><strong>Total Sueldo:</strong> ${salarioNeto.toFixed(2)}</p>
     `;
 }
 function obtener_proporcionalidad(puntaje_cargo, suma_fija,cargo_testigo){ 
@@ -90,7 +90,23 @@ function obtenerSueldoMinimoGarantizado(jornada){
     if (jornada === "completa") return  60000;
     return 0;
 }
-    
+
+function calcularSalarioNeto(antiguedadPorcentaje,sueldoBasico, antiguedadMonto, sumaFijaDecreto, antiguedadDecreto, adicionalSalarial, materialDidactico){
+    salarioNeto = 0
+    if (antiguedadPorcentaje > 50){
+
+        salarioNeto = (sueldoBasico + antiguedadMonto + sumaFijaDecreto + antiguedadDecreto + adicionalSalarial + materialDidactico ) *0.19;
+    } else {
+        salarioNeto = (sueldoBasico + antiguedadMonto + sumaFijaDecreto + antiguedadDecreto + adicionalSalarial) *0.19 + materialDidactico;
+    }
+    return salarioNeto;    
+}
+
+
+function calcularMaterialDidactico(sumaFijaMaterialDidactico, puntajeCargo,puntajeCargoTestigo){
+    return obtener_proporcionalidad(puntajeCargo, sumaFijaMaterialDidactico, puntajeCargoTestigo);
+     
+}
 function calcular_complemento_minimo_garantizado(sueldoBasico, antiguedadMonto, adicionalSalarial, sumaFijaDecreto, antiguedadDecreto, materialDidactico, sueldoMinimoGarantizado) {
     var complementoMinimoGarantizado = sueldoBasico + antiguedadMonto + adicionalSalarial + sumaFijaDecreto + antiguedadDecreto + materialDidactico;
 
@@ -106,23 +122,23 @@ function calcular_complemento_minimo_garantizado(sueldoBasico, antiguedadMonto, 
 function obtenerPorcentajeAntiguedad(antiguedad) {
     switch (antiguedad) {
         case "1-3":
-            return 5;
+            return 0;
         case "4-6":
-            return 10;
-        case "7-9":
-            return 15;
-        case "10-11":
-            return 20;
-        case "12-13":
-            return 25;
-        case "14-15":
             return 30;
-        case "16-17":
-            return 35;
-        case "17-19":
+        case "7-9":
             return 40;
-        case "20_mas":
+        case "10-11":
             return 50;
+        case "12-13":
+            return 60;
+        case "14-15":
+            return 70;
+        case "16-17":
+            return 80;
+        case "17-19":
+            return 90;
+        case "20_mas":
+            return 100;
         default:
             return 0;
     }
