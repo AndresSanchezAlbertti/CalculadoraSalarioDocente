@@ -1,4 +1,9 @@
 
+//importar todas las clases
+import { SueldoBasico } from "./sueldoBasico.js";
+import { Antiguedad } from "./Antiguedad.js";
+import { Decreto483 } from "./Decreto483.js";
+
 const cargosDB = [
     { area: "primaria", nombre_cargo: "maestro_grado(j.s)", puntaje_cargo: 1135 },
     { area: "primaria", nombre_cargo: "vicedirector(j.s)", puntaje_cargo: 15 },
@@ -49,9 +54,11 @@ function calcularSueldo() {
     const puntajeCargo = cargoData.puntaje_cargo;
     //OBTENGO PORCENTAJE DE ANTIGUEDAD
     const antiguedadPorcentaje = obtenerPorcentajeAntiguedad(antiguedad);
+    alert(antiguedadPorcentaje);
     //CALCULO SUELDO BASICO
     const sueldoBasico = new SueldoBasico(puntajeCargo, INDICE_I).calcularSueldoBasico();
-    //CAÑCULO ANTIGUEDAD
+    alert(sueldoBasico.toFixed(2));
+    //CALCULO ANTIGUEDAD
     const antiguedadMonto = new Antiguedad(antiguedadPorcentaje, sueldoBasico).calcularAntiguedad();
     //CALCULO SUMA FIJA DECRETO
 
