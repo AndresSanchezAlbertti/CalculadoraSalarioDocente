@@ -30,8 +30,8 @@ function calcularSueldo() {
         return;
     }
 //carga datos 
-//obtengo el porcentaje de antiguedad
-//calculo el sueldo basico
+
+
 //calculo la antiguedad
 //calculo la suma fija decreto
 //calculo la antiguedad decreto
@@ -45,17 +45,30 @@ function calcularSueldo() {
 //calculo el total del sueldo
 
     const puntajeCargo = cargoData.puntaje_cargo;
-
+    
+    //obtengo el porcentaje de antigueda
     const antiguedadPorcentaje = obtenerPorcentajeAntiguedad(antiguedad);
+    
+    //calculo el sueldo basico
     const sueldoBasico = puntajeCargo * INDICE_I;
+    alert(sueldoBasico);
+    //calculo la antiguedad
     const antiguedadMonto = (sueldoBasico * antiguedadPorcentaje) / 100;
-
+    
+    //calculo la suma fija decreto
     const sumaFijaDecreto = obtener_proporcionalidad(puntajeCargo, sumaFijaTestigo, puntajeCargoTestigo);
+    alert(sumaFijaDecreto);
+    //calculo la antiguedad decreto
     const antiguedadDecreto = (sumaFijaDecreto * antiguedadPorcentaje)/100;
+    
+    //calculo el adicional salarial
     const adicionalSalarial = (sueldoBasico + sumaFijaDecreto) * 0.1;
+    //calculo el didactico
     const materialDidactico = sumaFijaDecreto * 0.4;
     const materialDidacticoNRNB = sumaFijaDecreto * 0.6;
+    //calculo el complemento minimo garantizado
     const complementoMinimoGarantizado = calcular_complemento_minimo_garantizado(sueldoBasico, antiguedadMonto, adicionalSalarial, sumaFijaDecreto, antiguedadDecreto, materialDidactico, obtenerSueldoMinimoGarantizado(jornada));
+
     const cfp = jornadaEquivalente(jornada) * 0.5;
     const sumaFija = puntajeCargo * 0.8;
     const compensacionTransitoria = jornadaEquivalente(jornada) * 0.7;
@@ -105,24 +118,28 @@ function calcular_complemento_minimo_garantizado(sueldoBasico, antiguedadMonto, 
 
 function obtenerPorcentajeAntiguedad(antiguedad) {
     switch (antiguedad) {
+        case "0":
+            return 0;
         case "1-3":
-            return 5;
-        case "4-6":
-            return 10;
-        case "7-9":
-            return 15;
-        case "10-11":
-            return 20;
-        case "12-13":
-            return 25;
-        case "14-15":
             return 30;
-        case "16-17":
-            return 35;
-        case "17-19":
+        case "4-6":
             return 40;
-        case "20_mas":
+        case "7-9":
             return 50;
+        case "10-11":
+            return 60;
+        case "12-13":
+            return 70;
+        case "14-15":
+            return 80;
+        case "16-17":
+            return 90;
+        case "18-19":
+            return 100;
+        case "20-21":
+            return 110;
+        case "22 o mas":
+            return 120;
         default:
             return 0;
     }
