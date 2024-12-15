@@ -103,7 +103,9 @@ function obtenerSueldoMinimoGarantizado(jornada){
     if (jornada === "completa") return  60000;
     return 0;
 }
-    
+function calcularSalarioNeto(sueldoBasico, antiguedadMonto, sumaFijaDecreto, antiguedadDecreto, materialDidactico, sueldoMinimoGarantizado) {
+    return sueldoBruto * 0.9;
+}
 function calcular_complemento_minimo_garantizado(sueldoBasico, antiguedadMonto, adicionalSalarial, sumaFijaDecreto, antiguedadDecreto, materialDidactico, sueldoMinimoGarantizado) {
     var complementoMinimoGarantizado = sueldoBasico + antiguedadMonto + adicionalSalarial + sumaFijaDecreto + antiguedadDecreto + materialDidactico;
 
@@ -115,6 +117,7 @@ function calcular_complemento_minimo_garantizado(sueldoBasico, antiguedadMonto, 
 
         
 }
+
 
 function obtenerPorcentajeAntiguedad(antiguedad) {
     switch (antiguedad) {
